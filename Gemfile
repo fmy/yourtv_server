@@ -10,6 +10,7 @@ gem 'omniauth-twitter'
 gem 'twitter'
 gem "haml"
 gem "haml-rails"
+gem "nokogiri"
 
 group :assets do
   gem 'sass-rails',   '~> 3.2.3'
