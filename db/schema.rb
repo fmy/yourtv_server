@@ -11,15 +11,30 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20130609142913) do
+ActiveRecord::Schema.define(:version => 20130614141755) do
+
+  create_table "tv_shows", :force => true do |t|
+    t.string   "title",       :null => false
+    t.string   "description"
+    t.string   "area",        :null => false
+    t.string   "station",     :null => false
+    t.datetime "start",       :null => false
+    t.datetime "stop",        :null => false
+    t.datetime "created_at",  :null => false
+    t.datetime "updated_at",  :null => false
+  end
+
+  add_index "tv_shows", ["title", "area", "start"], :name => "index_tv_shows_on_title_and_area_and_start", :unique => true
 
   create_table "users", :force => true do |t|
-    t.string   "provider"
-    t.string   "uid"
-    t.string   "name"
+    t.string   "provider",           :null => false
+    t.string   "uid",                :null => false
+    t.string   "name",               :null => false
     t.string   "image_url"
-    t.datetime "created_at", :null => false
-    t.datetime "updated_at", :null => false
+    t.string   "oauth_token"
+    t.string   "oauth_token_secret"
+    t.datetime "created_at",         :null => false
+    t.datetime "updated_at",         :null => false
   end
 
   add_index "users", ["provider", "uid"], :name => "index_users_on_provider_and_uid", :unique => true

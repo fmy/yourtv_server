@@ -1,0 +1,15 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/Fixtures.html
+
+one:
+  title: MyString
+  description: MyString
+  station: MyString
+  start: 
+  stop: 
+
+two:
+  title: MyString
+  description: MyString
+  station: MyString
+  start: 
+  stop: 

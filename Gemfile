@@ -11,6 +11,8 @@ gem 'twitter'
 gem "haml"
 gem "haml-rails"
 gem "nokogiri"
+gem "igo-ruby"
+gem 'whenever', :require => false
 
 group :assets do
   gem 'sass-rails',   '~> 3.2.3'
