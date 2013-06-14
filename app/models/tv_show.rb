@@ -16,11 +16,12 @@ class TvShow < ActiveRecord::Base
   #
   # config/schedule.rb で毎日0時に取得
   #
-  def self.get_from_rss(area)
+  def self.get_from_rss(area, after)
     require 'open-uri'
 
     area ||= "013"
-    time = Time.now.since(6.days).beginning_of_day
+    after ||= 6
+    time = Time.now.since(after.days).beginning_of_day
     day = time.to_date
     date = day.strftime "%Y%m%d"
     hour = "00"
