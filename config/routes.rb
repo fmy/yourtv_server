@@ -7,4 +7,8 @@ YourtvServer::Application.routes.draw do
   # tv
   get "tv/get", to: "tv_shows#get"
 
+  # user
+  get "users/:id", to: "users#show"
+  get "users/:id/tweets", to: "users#tweets"
+
 end

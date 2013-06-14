@@ -9,5 +9,4 @@ class TvShowsController < ApplicationController
 
   private
 
-
 end

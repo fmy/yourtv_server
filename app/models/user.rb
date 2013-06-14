@@ -28,9 +28,12 @@ class User < ActiveRecord::Base
     rt = []
 
     #最近retweetされた自分のtweetを取得して各tweetをparseしてばらばらにする
-    Twitter.retweets_of_me(:count=>100).each do |t|
+    Twitter.user_timeline(:count=>200).each do |t|
             #毎ツイートに付与される定型文の部分をカット
       t.text.gsub!(/→.*http:.*/,'')
+      t.text.gsub!(/@.*/,'')
+      t.text.gsub!(/via.*/,'')
+      t.text.gsub!(/RT/,'')
       t.text.gsub!(/http:.*/,'')
       t.text.gsub!(/&gt;&lt;/,'')
       tagger.parse(t.text.encode('utf-8')).each do |m|
