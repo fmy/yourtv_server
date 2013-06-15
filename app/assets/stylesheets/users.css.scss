@@ -1,0 +1,42 @@
+@font-face{
+  font: {
+    family: 'KodomoRounded';
+    weight: 'normal';
+    style:  'normal';
+  }
+  src: asset-url('KodomoRounded.otf', font) format('truetype');
+}
+
+body {
+  background-color: #59BB0C;
+  color: #fff;
+  text-align: center;
+  font-family: KodomoRounded;
+}
+
+.title {
+  margin: 50px auto;
+  font-size: 60px;
+
+  p {
+    margin: 0px;
+  }
+}
+
+.btn {
+  margin: 10px;
+  background-color: #fff;
+  padding: 9px 14px;
+  color: #59BB0C;
+  font-size: 20px;
+  font-weight: bold;
+  text-decoration: none;
+}
+
+.btn:hover {
+  background-color: #fee;
+}
+
+.dont_tweet {
+  margin: 10px;
+}

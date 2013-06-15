@@ -1,6 +1,7 @@
 YourtvServer::Application.routes.draw do
 
   # OAuth
+  get "login", to: "users#new"
   match "/auth/:provider/callback", to: "sessions#create"
   match "/logout", to: "sessions#destroy"
 
