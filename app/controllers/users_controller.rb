@@ -17,6 +17,8 @@ class UsersController < ApplicationController
   def tv_shows
     user = User.find(params[:id])
     shows = user.recommends(params[:area])
+
+    response.headers["Content-Type"] = "text/html"
     render json: shows
   end
 
