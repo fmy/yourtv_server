@@ -21,7 +21,7 @@ class TvShow < ActiveRecord::Base
   #
   # config/schedule.rb で毎日0時に取得
   #
-  def self.get_from_rss(area = "013", after = 5)
+  def self.get_from_rss(area = "013", after = 0)
     require 'open-uri'
 
     time = Time.now.since(after.days).beginning_of_day

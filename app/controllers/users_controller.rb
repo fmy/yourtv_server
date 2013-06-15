@@ -19,12 +19,16 @@ class UsersController < ApplicationController
 
   def words
     words = User.find(params[:id]).words(params[:min].to_i)
+
+    response.headers["Content-Type"] = "text/html"
     render json: words.to_json
   end
 
   def analyze
     user = User.find(params[:id])
     words = user.analyze_tweets
+
+    response.headers["Content-Type"] = "text/html"
     render json: words.to_json
   end
 
@@ -42,6 +46,8 @@ class UsersController < ApplicationController
     user.latest_tweet = nil
     user.save
     user.first_analyze
+
+    response.headers["Content-Type"] = "text/html"
     render json: user
   end
 end

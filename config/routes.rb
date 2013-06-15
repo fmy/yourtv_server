@@ -7,6 +7,7 @@ YourtvServer::Application.routes.draw do
 
   # tv
   get "tv_shows/:area", to: "tv_shows#index"
+  get "tv_shows/:area/update(/:after)", to: "tv_shows#update"
 
   # user
   get "users/:id", to: "users#show"
