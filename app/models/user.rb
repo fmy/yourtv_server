@@ -29,12 +29,13 @@ class User < ActiveRecord::Base
 
     #最近retweetされた自分のtweetを取得して各tweetをparseしてばらばらにする
     Twitter.user_timeline(:count=>200).each do |t|
-            #毎ツイートに付与される定型文の部分をカット
+      #毎ツイートに付与される定型文の部分をカット
       t.text.gsub!(/→.*http:.*/,'')
       t.text.gsub!(/@.*/,'')
       t.text.gsub!(/via.*/,'')
       t.text.gsub!(/RT/,'')
       t.text.gsub!(/http:.*/,'')
+      t.text.gsub!(/https:.*/,'')
       t.text.gsub!(/&gt;&lt;/,'')
       tagger.parse(t.text.encode('utf-8')).each do |m|
         if m.feature =~ /名詞.*/
@@ -45,15 +46,17 @@ class User < ActiveRecord::Base
 
     #parseしたtweetの重複している言葉の個数を数える
     ranks = []
-    rt.uniq.map do |t|
+    # ranks = []
+    rt.uniq.each do |t|
       next if t.length <= 1
       next if rt.grep(t).count< 3#出現回数が3未満のwordを削除
-      ranks << "#{sprintf('%02d',rt.grep(t).count)}=>#{t}"
+      # ranks << "#{sprintf('%02d',rt.grep(t).count)}=>#{t}"
+      ranks << {word: t, count: rt.grep(t).count }
     end
 
     #parseしたtweetが入っている配列を降順にならべかえて出力
-    #降順でソート。sprintfで0詰めしてるからなんとかなる
-    ranks.sort{|a,b| b <=> a}
+    # sort (-) は降順
+    hash_ranks = ranks.sort{ |a, b| -(a[:count] <=> b[:count]) }
   end
 
 end
