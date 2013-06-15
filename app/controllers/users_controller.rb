@@ -13,7 +13,7 @@ class UsersController < ApplicationController
 
   def tv_shows
     user = User.find(params[:id])
-    shows = TvShow.now(params[:area])
+    shows = user.recommends(params[:area])
     render json: shows
   end
 

@@ -15,6 +15,16 @@ class User < ActiveRecord::Base
     end
   end
 
+  def recommends(area = "013")
+    words = analyze_tweets.map { |w| w[:word] }
+    now = Time.now
+    shows = []
+    words.each do |word|
+      shows = shows | TvShow.where("area = ? and start <= ? and stop >= ? and ( title like ? or description like ? )", area, now.since(1.days), now, "%#{word}%", "%#{word}%")
+    end
+    shows
+  end
+
   def analyze_tweets
     #認証方法
     Twitter.configure do |config|
@@ -34,6 +44,7 @@ class User < ActiveRecord::Base
       t.text.gsub!(/@.*/,'')
       t.text.gsub!(/via.*/,'')
       t.text.gsub!(/RT/,'')
+      t.text.gsub!(/\.\.\./,'')
       t.text.gsub!(/http:.*/,'')
       t.text.gsub!(/https:.*/,'')
       t.text.gsub!(/&gt;&lt;/,'')
