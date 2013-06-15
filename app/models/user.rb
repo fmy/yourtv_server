@@ -22,7 +22,8 @@ class User < ActiveRecord::Base
       return false
     end
     hash = Hash[word_hash.split("\t").map{|f| f.split(":", 2)}]
-    words = hash.map { |key, value| key }
+    words = []
+    hash.each { |word, count| words << word if count.to_i >= 2 }
     now = Time.now
     shows = []
     words.each do |word|
@@ -48,8 +49,9 @@ class User < ActiveRecord::Base
       count: 200,
       trim_user: true
     }
-    Twitter.user_timeline(options).each_with_index do |t, index|
-      self.latest_tweet = t.id if index == 0
+
+    Twitter.user_timeline(options).each_with_index do |t|
+      break if t.id == self.latest_tweet
       #毎ツイートに付与される定型文の部分をカット
       t.text.gsub!(/→.*http:.*/,'')
       t.text.gsub!(/@.*/,'')
@@ -59,6 +61,9 @@ class User < ActiveRecord::Base
       t.text.gsub!(/http:.*/,'')
       t.text.gsub!(/https:.*/,'')
       t.text.gsub!(/&gt;&lt;/,'')
+      t.text.gsub!(/www/,'')
+      t.text.gsub!(/・/,'')
+      t.text.gsub!(/,/,'')
       tagger.parse(t.text.encode('utf-8')).each do |m|
         if m.feature =~ /名詞.*/
           rt << m.surface
@@ -66,20 +71,40 @@ class User < ActiveRecord::Base
       end
     end
 
-    #parseしたtweetの重複している言葉の個数を数える
-    ranks = {}
+    self.latest_tweet = Twitter.user_timeline(options).first.id
+
+    hash = self.word_hash ? Hash[self.word_hash.split("\t").map{|f| f.split(":", 2)}] : {}
+    new_hash = {}
     # ranks = []
-    rt.uniq.each do |t|
-      next if t.length <= 1
-      next if rt.grep(t).count< 3#出現回数が3未満のwordを削除
-      # ranks << "#{sprintf('%02d',rt.grep(t).count)}=>#{t}"
-      ranks[t] = rt.grep(t).count
+    if hash.any?
+      hash.each do |w, c|
+        new_hash[w] = hash[w] unless rt.uniq.include?(w)
+      end
+      array = hash.map { |w, c| w }
+      rt.uniq.each do |t|
+        next if t.length <= 1
+        if array.include?(t)
+          new_hash[t] = (hash[t].to_i + rt.grep(t).count).to_s
+        else
+          new_hash[t] = rt.grep(t).count.to_s
+        end
+      end
+    else
+      rt.uniq.each do |t|
+        new_hash[t] = rt.grep(t).count.to_s
+      end
     end
+
+      # next if rt.grep(t).count< 3#出現回数が3未満のwordを削除
+      # ranks << "#{sprintf('%02d',rt.grep(t).count)}=>#{t}"
+      # ranks[t] = rt.grep(t).count
+
     #parseしたtweetが入っている配列を降順にならべかえて出力
     # sort (-) は降順
     # hash_ranks = ranks.sort_by{ |key, value| -value }
-    self.word_hash = ranks.map { |key, value| "#{key}:#{value}" }.join("\t")
+    self.word_hash = new_hash.map { |word, count| "#{word}:#{count}" }.join("\t")
     self.save!
+    new_hash
   end
 
 end
