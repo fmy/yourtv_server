@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 class User < ActiveRecord::Base
-  attr_accessible :provider, :uid, :name, :image_url, :oauth_token, :oauth_token_secret
+  attr_accessible :provider, :uid, :name, :image_url, :oauth_token, :oauth_token_secret, :word_hash
 
   def self.login(auth)
     logger.info auth
@@ -13,10 +13,17 @@ class User < ActiveRecord::Base
       user.oauth_token_secret = auth.credentials.secret
       user.save!
     end
+    analyze_tweets
+    user
   end
 
   def recommends(area = "013")
-    words = analyze_tweets.map { |w| w[:word] }
+    unless word_hash
+      analyze_tweets
+      return false
+    end
+    hash = Hash[word_hash.split("\t").map{|f| f.split(":", 2)}]
+    words = hash.map { |key, value| key }
     now = Time.now
     shows = []
     words.each do |word|
@@ -56,18 +63,19 @@ class User < ActiveRecord::Base
     end
 
     #parseしたtweetの重複している言葉の個数を数える
-    ranks = []
+    ranks = {}
     # ranks = []
     rt.uniq.each do |t|
       next if t.length <= 1
       next if rt.grep(t).count< 3#出現回数が3未満のwordを削除
       # ranks << "#{sprintf('%02d',rt.grep(t).count)}=>#{t}"
-      ranks << {word: t, count: rt.grep(t).count }
+      ranks[t] = rt.grep(t).count
     end
-
     #parseしたtweetが入っている配列を降順にならべかえて出力
     # sort (-) は降順
-    hash_ranks = ranks.sort{ |a, b| -(a[:count] <=> b[:count]) }
+    # hash_ranks = ranks.sort_by{ |key, value| -value }
+    self.word_hash = ranks.map { |key, value| "#{key}:#{value}" }.join("\t")
+    self.save!
   end
 
 end

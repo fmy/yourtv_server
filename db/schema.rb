@@ -33,6 +33,7 @@ ActiveRecord::Schema.define(:version => 20130614141755) do
     t.string   "image_url"
     t.string   "oauth_token"
     t.string   "oauth_token_secret"
+    t.text     "word_hash"
     t.datetime "created_at",         :null => false
     t.datetime "updated_at",         :null => false
   end
