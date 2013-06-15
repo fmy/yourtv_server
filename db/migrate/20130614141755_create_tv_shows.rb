@@ -10,6 +10,6 @@ class CreateTvShows < ActiveRecord::Migration
 
       t.timestamps
     end
-    add_index :tv_shows, [:title, :area, :start], unique: true
+    add_index :tv_shows, [:station, :area, :start], unique: true
   end
 end

@@ -47,9 +47,9 @@ class TvShow < ActiveRecord::Base
         stop = stop.ago(1.days)
       end
 
-      show = TvShow.where(title: i.xpath("title").text.split(" [")[0], area: area, start: start).first_or_initialize
+      show = TvShow.where(station: i.xpath("category").text, area: area, start: start).first_or_initialize
       show.description = i.xpath("description").text
-      show.station = i.xpath("category").text
+      show.title = i.xpath("title").text.split(" [")[0]
       show.stop = stop
       show.save
       show

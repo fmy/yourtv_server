@@ -24,7 +24,7 @@ ActiveRecord::Schema.define(:version => 20130614141755) do
     t.datetime "updated_at",  :null => false
   end
 
-  add_index "tv_shows", ["title", "area", "start"], :name => "index_tv_shows_on_title_and_area_and_start", :unique => true
+  add_index "tv_shows", ["station", "area", "start"], :name => "index_tv_shows_on_station_and_area_and_start", :unique => true
 
   create_table "users", :force => true do |t|
     t.string   "provider",           :null => false
