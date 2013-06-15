@@ -3,7 +3,7 @@ class User < ActiveRecord::Base
   attr_accessible :provider, :uid, :name, :image_url, :oauth_token, :oauth_token_secret, :word_hash, :latest_tweet
 
   def self.login(auth)
-    user = where(auth.slice(:uid)).first_or_initialize.tap do |user|
+    where(auth.slice(:uid)).first_or_initialize.tap do |user|
       user.provider = auth.provider
       user.uid = auth.uid
       user.name = auth.info.name
@@ -12,8 +12,6 @@ class User < ActiveRecord::Base
       user.oauth_token_secret = auth.credentials.secret
       user.save!
     end
-    user.analyze_tweets
-    user
   end
 
   def recommends(area = "013")
@@ -23,13 +21,17 @@ class User < ActiveRecord::Base
     end
     hash = parse(word_hash)
     words = []
-    hash.each { |word, count| words << word if count.to_i >= 2 }
+    hash.each { |word, count| words << word if count.to_i >= 5 }
     now = Time.now
     shows = []
     words.each do |word|
       shows = shows | TvShow.where("area = ? and start <= ? and stop >= ? and ( title like ? or description like ? )", area, now.since(1.days), now, "%#{word}%", "%#{word}%")
     end
     shows
+  end
+
+  def words
+    parse(word_hash)
   end
 
   def analyze_tweets
@@ -46,9 +48,16 @@ class User < ActiveRecord::Base
 
   def first_analyze # 未実装
     prepare_analyze
-    tweets = (1..5).flat_map do |page|
+    tweets = (1..4).flat_map do |page|
       Twitter.user_timeline(count: 200, page: page, trim_user: true)
     end
+    words = analyze(tweets)
+    self.latest_tweet = tweets.first.id
+
+    new_hash = merge_hash(words)
+    self.word_hash = serialize(new_hash)
+    self.save!
+    new_hash
   end
 
   def prepare_analyze
