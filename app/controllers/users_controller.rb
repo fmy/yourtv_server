@@ -11,4 +11,10 @@ class UsersController < ApplicationController
     render json: tweets.to_json
   end
 
+  def tv_shows
+    user = User.find(params[:id])
+    shows = TvShow.now(params[:area])
+    render json: shows
+  end
+
 end

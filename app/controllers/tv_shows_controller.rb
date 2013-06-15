@@ -1,8 +1,8 @@
 # -*- coding:utf-8 -*-
 class TvShowsController < ApplicationController
 
-  def get
-    shows = TvShow.today
+  def index
+    shows = TvShow.today(params[:area])
     # shows = get_tv_sonet()
     render json: shows
   end

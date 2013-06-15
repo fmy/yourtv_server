@@ -5,10 +5,11 @@ YourtvServer::Application.routes.draw do
   match "/logout", to: "sessions#destroy"
 
   # tv
-  get "tv/get", to: "tv_shows#get"
+  get "tv_shows/:area", to: "tv_shows#index"
 
   # user
   get "users/:id", to: "users#show"
+  get "users/:id/tv_shows/:area", to: "users#tv_shows"
   get "users/:id/tweets", to: "users#tweets"
 
 end

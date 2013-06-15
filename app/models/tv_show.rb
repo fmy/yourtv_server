@@ -2,9 +2,14 @@
 class TvShow < ActiveRecord::Base
   attr_accessible :area, :description, :start, :station, :stop, :title
 
-  def self.today
+  def self.today(area)
+    now = Time.now.beginning_of_day
+    TvShow.where("area = ? and start <= ? and stop >= ?", area, now.since(1.days), now)
+  end
+
+  def self.now(area)
     now = Time.now
-    TvShow.where("start <= ? and stop >= ?", now.beginning_of_day.since(1.days), now.beginning_of_day)
+    TvShow.where("area = ? and start <= ? and stop >= ?", area, now.since(1.days), now)
   end
 
   # ------------ テレビ番組を取得 ------------
