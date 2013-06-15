@@ -18,7 +18,7 @@ class UsersController < ApplicationController
   end
 
   def words
-    words = User.find(params[:id]).words
+    words = User.find(params[:id]).words(params[:min].to_i)
     render json: words.to_json
   end
 

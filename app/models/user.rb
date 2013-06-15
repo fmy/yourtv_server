@@ -15,10 +15,7 @@ class User < ActiveRecord::Base
   end
 
   def recommends(area = "013")
-    unless word_hash
-      analyze_tweets
-      return false
-    end
+    analyze_tweets unless word_hash
     hash = parse(word_hash)
     words = []
     hash.each { |word, count| words << word if count.to_i >= 5 }
@@ -30,8 +27,12 @@ class User < ActiveRecord::Base
     shows
   end
 
-  def words
-    parse(word_hash)
+  def words(min = 1)
+    words = []
+    parse(word_hash).each do |word, count|
+      words << "#{count} : #{word}" if count.to_i >= min
+    end
+    words
   end
 
   def analyze_tweets
@@ -76,17 +77,16 @@ class User < ActiveRecord::Base
     tweets.each do |t|
       break if t.id == self.latest_tweet
       #毎ツイートに付与される定型文の部分をカット
-      t.text.gsub!(/→.*http:.*/,'')
       t.text.gsub!(/@.*/,'')
       t.text.gsub!(/via.*/,'')
       t.text.gsub!(/RT/,'')
-      t.text.gsub!(/\.\.\./,'')
       t.text.gsub!(/http:.*/,'')
       t.text.gsub!(/https:.*/,'')
       t.text.gsub!(/&gt;&lt;/,'')
-      t.text.gsub!(/www/,'')
-      t.text.gsub!(/・/,'')
+      t.text.gsub!(/ww/,'')
+      t.text.gsub!(/[・,\.,‥,…]+/,'')
       t.text.gsub!(/,/,'')
+      t.text.gsub!(/\([0-9]+\)/,'')
       t.text.gsub!(/[0-9]+/,'')
       tagger.parse(t.text.encode('utf-8')).each do |m|
         if m.feature =~ /名詞.*/

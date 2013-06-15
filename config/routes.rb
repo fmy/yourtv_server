@@ -13,6 +13,6 @@ YourtvServer::Application.routes.draw do
   get "users/:id/first/:area", to: "users#first"
   get "users/:id/tv_shows/:area", to: "users#tv_shows"
   get "users/:id/analyze", to: "users#analyze"
-  get "users/:id/words", to: "users#words"
+  get "users/:id/words(/:min)", to: "users#words"
 
 end
