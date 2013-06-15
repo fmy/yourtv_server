@@ -4,7 +4,7 @@ class User < ActiveRecord::Base
 
   def self.login(auth)
     logger.info auth
-    where(auth.slice(:uid)).first_or_initialize.tap do |user|
+    user = where(auth.slice(:uid)).first_or_initialize.tap do |user|
       user.provider = auth.provider
       user.uid = auth.uid
       user.name = auth.info.name
@@ -13,7 +13,7 @@ class User < ActiveRecord::Base
       user.oauth_token_secret = auth.credentials.secret
       user.save!
     end
-    analyze_tweets
+    user.analyze_tweets
     user
   end
 
