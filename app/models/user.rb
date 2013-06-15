@@ -15,7 +15,7 @@ class User < ActiveRecord::Base
   end
 
   def recommends(area = "013")
-    analyze_tweets unless word_hash
+    first_analyze unless word_hash
     hash = parse(word_hash)
     words = []
     hash.each { |word, count| words << word if count.to_i >= 5 }

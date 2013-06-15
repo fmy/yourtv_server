@@ -36,4 +36,12 @@ class UsersController < ApplicationController
     render json: shows
   end
 
+  def reset_words
+    user = User.find(params[:id])
+    user.word_hash = nil
+    user.latest_tweet = nil
+    user.save
+    user.first_analyze
+    render json: user
+  end
 end
