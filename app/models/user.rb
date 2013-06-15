@@ -21,7 +21,7 @@ class User < ActiveRecord::Base
       analyze_tweets
       return false
     end
-    hash = Hash[word_hash.split("\t").map{|f| f.split(":", 2)}]
+    hash = parse(word_hash)
     words = []
     hash.each { |word, count| words << word if count.to_i >= 2 }
     now = Time.now
@@ -33,6 +33,25 @@ class User < ActiveRecord::Base
   end
 
   def analyze_tweets
+    prepare_analyze
+    tweets = Twitter.user_timeline(count: 200, trim_user: true)
+    words = analyze(tweets)
+    self.latest_tweet = tweets.first.id
+
+    new_hash = merge_hash(words)
+    self.word_hash = serialize(new_hash)
+    self.save!
+    new_hash
+  end
+
+  def first_analyze # 未実装
+    prepare_analyze
+    tweets = (1..5).flat_map do |page|
+      Twitter.user_timeline(count: 200, page: page, trim_user: true)
+    end
+  end
+
+  def prepare_analyze
     #認証方法
     Twitter.configure do |config|
      config.consumer_key = "US0M6rwza0mL7ODztOwEA"
@@ -40,17 +59,12 @@ class User < ActiveRecord::Base
      config.oauth_token = oauth_token
      config.oauth_token_secret = oauth_token_secret
     end
+  end
 
+  def analyze(tweets)
+    words = []
     tagger = Igo::Tagger.new("#{Rails.root}/extras/ipadic")
-    rt = []
-
-    #最近retweetされた自分のtweetを取得して各tweetをparseしてばらばらにする
-    options = {
-      count: 200,
-      trim_user: true
-    }
-
-    Twitter.user_timeline(options).each_with_index do |t|
+    tweets.each do |t|
       break if t.id == self.latest_tweet
       #毎ツイートに付与される定型文の部分をカット
       t.text.gsub!(/→.*http:.*/,'')
@@ -64,47 +78,47 @@ class User < ActiveRecord::Base
       t.text.gsub!(/www/,'')
       t.text.gsub!(/・/,'')
       t.text.gsub!(/,/,'')
+      t.text.gsub!(/[0-9]+/,'')
       tagger.parse(t.text.encode('utf-8')).each do |m|
         if m.feature =~ /名詞.*/
-          rt << m.surface
+          words << m.surface
         end
       end
     end
+    words
+  end
 
-    self.latest_tweet = Twitter.user_timeline(options).first.id
-
-    hash = self.word_hash ? Hash[self.word_hash.split("\t").map{|f| f.split(":", 2)}] : {}
+  def merge_hash(words)
+    hash = word_hash ? parse(word_hash) : {}
     new_hash = {}
-    # ranks = []
     if hash.any?
       hash.each do |w, c|
-        new_hash[w] = hash[w] unless rt.uniq.include?(w)
+        new_hash[w] = hash[w] unless words.uniq.include?(w)
       end
       array = hash.map { |w, c| w }
-      rt.uniq.each do |t|
+      words.uniq.each do |t|
         next if t.length <= 1
         if array.include?(t)
-          new_hash[t] = (hash[t].to_i + rt.grep(t).count).to_s
+          new_hash[t] = (hash[t].to_i + words.grep(t).count).to_s
         else
-          new_hash[t] = rt.grep(t).count.to_s
+          new_hash[t] = words.grep(t).count.to_s
         end
       end
     else
-      rt.uniq.each do |t|
-        new_hash[t] = rt.grep(t).count.to_s
+      words.uniq.each do |t|
+        next if t.length <= 1
+        new_hash[t] = words.grep(t).count.to_s
       end
     end
-
-      # next if rt.grep(t).count< 3#出現回数が3未満のwordを削除
-      # ranks << "#{sprintf('%02d',rt.grep(t).count)}=>#{t}"
-      # ranks[t] = rt.grep(t).count
-
-    #parseしたtweetが入っている配列を降順にならべかえて出力
-    # sort (-) は降順
-    # hash_ranks = ranks.sort_by{ |key, value| -value }
-    self.word_hash = new_hash.map { |word, count| "#{word}:#{count}" }.join("\t")
-    self.save!
     new_hash
+  end
+
+  def parse(string)
+    Hash[string.split("\t").map{|f| f.split(":", 2)}]
+  end
+
+  def serialize(hash)
+    hash.map { |word, count| "#{word}:#{count}" }.join("\t")
   end
 
 end
