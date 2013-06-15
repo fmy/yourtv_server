@@ -21,11 +21,9 @@ class TvShow < ActiveRecord::Base
   #
   # config/schedule.rb で毎日0時に取得
   #
-  def self.get_from_rss(area, after)
+  def self.get_from_rss(area = "013", after = 5)
     require 'open-uri'
 
-    area ||= "013"
-    after ||= 6
     time = Time.now.since(after.days).beginning_of_day
     day = time.to_date
     date = day.strftime "%Y%m%d"
@@ -63,5 +61,9 @@ class TvShow < ActiveRecord::Base
   # 025 滋賀 026 京都 027 大阪 028 兵庫 029 奈良 030 和歌山 031 鳥取 032 島根
   # 033 岡山 034 広島 035 山口 036 徳島 037 香川 038 愛媛 039 高知 040 福岡
   # 041 佐賀 042 長崎 043 熊本 044 大分 045 宮崎 046 鹿児島 047 沖縄
+
+  def self.sweep(time = 1.days.ago)
+    self.delete_all "stop < '#{time.to_s(:db)}'"
+  end
 
 end
