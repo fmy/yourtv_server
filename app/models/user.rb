@@ -1,9 +1,8 @@
 # -*- coding: utf-8 -*-
 class User < ActiveRecord::Base
-  attr_accessible :provider, :uid, :name, :image_url, :oauth_token, :oauth_token_secret, :word_hash
+  attr_accessible :provider, :uid, :name, :image_url, :oauth_token, :oauth_token_secret, :word_hash, :latest_tweet
 
   def self.login(auth)
-    logger.info auth
     user = where(auth.slice(:uid)).first_or_initialize.tap do |user|
       user.provider = auth.provider
       user.uid = auth.uid
@@ -45,7 +44,12 @@ class User < ActiveRecord::Base
     rt = []
 
     #最近retweetされた自分のtweetを取得して各tweetをparseしてばらばらにする
-    Twitter.user_timeline(:count=>200).each do |t|
+    options = {
+      count: 200,
+      trim_user: true
+    }
+    Twitter.user_timeline(options).each_with_index do |t, index|
+      self.latest_tweet = t.id if index == 0
       #毎ツイートに付与される定型文の部分をカット
       t.text.gsub!(/→.*http:.*/,'')
       t.text.gsub!(/@.*/,'')

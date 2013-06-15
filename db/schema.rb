@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20130614141755) do
+ActiveRecord::Schema.define(:version => 20130615081837) do
 
   create_table "tv_shows", :force => true do |t|
     t.string   "title",       :null => false
@@ -27,15 +27,16 @@ ActiveRecord::Schema.define(:version => 20130614141755) do
   add_index "tv_shows", ["station", "area", "start"], :name => "index_tv_shows_on_station_and_area_and_start", :unique => true
 
   create_table "users", :force => true do |t|
-    t.string   "provider",           :null => false
-    t.string   "uid",                :null => false
-    t.string   "name",               :null => false
+    t.string   "provider",                        :null => false
+    t.string   "uid",                             :null => false
+    t.string   "name",                            :null => false
     t.string   "image_url"
     t.string   "oauth_token"
     t.string   "oauth_token_secret"
     t.text     "word_hash"
-    t.datetime "created_at",         :null => false
-    t.datetime "updated_at",         :null => false
+    t.datetime "created_at",                      :null => false
+    t.datetime "updated_at",                      :null => false
+    t.integer  "latest_tweet",       :limit => 8
   end
 
   add_index "users", ["provider", "uid"], :name => "index_users_on_provider_and_uid", :unique => true
